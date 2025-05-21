@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 from multitenant_project.utils.aws_secrets import get_secret
 import os
+from dotenv import load_dotenv
+load_dotenv()
 # ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
 
@@ -92,10 +94,10 @@ for hostname in HOSTNAMES:
     
     DATABASES[hostname] = {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': creds['dbname'],
-        'USER': creds['username'],
-        'PASSWORD': creds['password'],
-        'HOST': creds['host'],
+        'NAME': creds['NAME'],
+        'USER': creds['USER'],
+        'PASSWORD': creds['PASS'],
+        'HOST': creds['HOST'],
         'PORT': str(creds.get('PORT', 3306)),
     }
 
