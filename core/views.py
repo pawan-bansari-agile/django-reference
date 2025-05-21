@@ -1,4 +1,5 @@
 from django.shortcuts import render
+# from django.http import JsonResponse
 
 # Create your views here.
 from django.http import JsonResponse
@@ -17,3 +18,6 @@ def get_messages(request):
         return JsonResponse({'db': db, 'messages': data})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+def health_check(request):
+    return JsonResponse({"status": "ok"})

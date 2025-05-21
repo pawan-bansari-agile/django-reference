@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from multitenant_project.utils.aws_secrets import get_secret
+import os
+# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -74,39 +78,61 @@ TEMPLATES = [
 WSGI_APPLICATION = 'multitenant_project.wsgi.application'
 
 
+
+DATABASES = {
+    'default': {}
+}
+
+HOSTNAMES = ['example1', 'example2', 'example3']  # Can be dynamic if stored in SSM or a file
+REGION = os.getenv('AWS_REGION', 'ap-south-1')
+
+for hostname in HOSTNAMES:
+    # secret_name = f"{hostname}_db_secret"  # You must create these in AWS Secrets Manager
+    creds = get_secret(hostname, REGION)
+    
+    DATABASES[hostname] = {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': creds['dbname'],
+        'USER': creds['username'],
+        'PASSWORD': creds['password'],
+        'HOST': creds['host'],
+        'PORT': str(creds.get('PORT', 3306)),
+    }
+
+
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        # 'ENGINE': 'django.db.backends.sqlite3',
-        # 'NAME': BASE_DIR / 'db.sqlite3',
-    },
-    'example1': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'example1',
-        'USER': 'example1',
-        'PASSWORD': 'example1pass',
-        'HOST': 'db',
-        'PORT': '3306',
-    },
-    'example2': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'example2',
-        'USER': 'example2',
-        'PASSWORD': 'example2pass',
-        'HOST': 'db',
-        'PORT': '3306',
-    },
-    'example3': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'example3',
-        'USER': 'example3',
-        'PASSWORD': 'example3pass',
-        'HOST': 'db',
-        'PORT': '3306',
-    },
-}
+# DATABASES = {
+#     'default': {
+#         # 'ENGINE': 'django.db.backends.sqlite3',
+#         # 'NAME': BASE_DIR / 'db.sqlite3',
+#     },
+#     'example1': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'example1',
+#         'USER': 'example1',
+#         'PASSWORD': 'example1pass',
+#         'HOST': 'db',
+#         'PORT': '3306',
+#     },
+#     'example2': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'example2',
+#         'USER': 'example2',
+#         'PASSWORD': 'example2pass',
+#         'HOST': 'db',
+#         'PORT': '3306',
+#     },
+#     'example3': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'example3',
+#         'USER': 'example3',
+#         'PASSWORD': 'example3pass',
+#         'HOST': 'db',
+#         'PORT': '3306',
+#     },
+# }
 
 
 # Password validation
